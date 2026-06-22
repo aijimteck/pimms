@@ -8,6 +8,11 @@ const otherBlock = document.querySelector("#other-block");
 const otherRequestField = document.querySelector("#other-request");
 const mediatorCallout = document.querySelector("#mediator-callout");
 const mediatorLink = document.querySelector("#mediator-link");
+const mediatorOpenButton = document.querySelector("#mediator-open");
+const mediatorDialog = document.querySelector("#mediator-dialog");
+const mediatorClose = document.querySelector("#mediator-close");
+const mediatorFrame = document.querySelector("#mediator-frame");
+const mediatorDialogLink = document.querySelector("#mediator-link-dialog");
 const progressFill = document.querySelector("#progress-fill");
 const progressText = document.querySelector("#progress-text");
 const needsValidationMessage = document.querySelector("#needs-validation-message");
@@ -22,6 +27,10 @@ const submitButton = form?.querySelector('button[type="submit"]');
 
 const groupCountNodes = Array.from(document.querySelectorAll("[data-group-count]"));
 const trackedGroups = groupCountNodes.map((node) => node.dataset.groupCount);
+const mediatorHelpLevelKey =
+  "j'ai besoin de prendre rendez-vous avec un mediateur social";
+
+let mediatorDialogAutoOpened = false;
 
 function setDisabledState(container, disabled) {
   const fields = container.querySelectorAll("input, select, textarea");
@@ -31,6 +40,14 @@ function setDisabledState(container, disabled) {
       field.required = !disabled;
     }
   });
+}
+
+function normalizeText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
 
 function updateResidenceVisibility() {
@@ -73,21 +90,66 @@ function updateOtherVisibility() {
   }
 }
 
+function hasValidMediatorUrl() {
+  return Boolean(
+    config.mediatorUrl && !String(config.mediatorUrl).includes(".invalid")
+  );
+}
+
+function syncMediatorTargets() {
+  if (!hasValidMediatorUrl()) {
+    return;
+  }
+
+  mediatorLink.href = config.mediatorUrl;
+  mediatorDialogLink.href = config.mediatorUrl;
+}
+
+function openMediatorExperience() {
+  if (!hasValidMediatorUrl()) {
+    return;
+  }
+
+  syncMediatorTargets();
+
+  if (mediatorFrame) {
+    mediatorFrame.src = config.mediatorUrl;
+  }
+
+  if (mediatorDialog && typeof mediatorDialog.showModal === "function") {
+    if (!mediatorDialog.open) {
+      mediatorDialog.showModal();
+    }
+    return;
+  }
+
+  window.open(config.mediatorUrl, "_blank", "noopener,noreferrer");
+}
+
+function closeMediatorDialog() {
+  if (!mediatorDialog?.open) {
+    return;
+  }
+
+  mediatorDialog.close();
+}
+
 function updateMediatorCallout() {
   const selectedHelp = form.elements.helpLevel?.value;
-  const shouldShow =
-    selectedHelp ===
-    "J'ai besoin de prendre rendez-vous avec un médiateur social";
+  const shouldShow = normalizeText(selectedHelp) === mediatorHelpLevelKey;
 
   mediatorCallout.hidden = !shouldShow;
-  mediatorLink.href = config.mediatorUrl || mediatorLink.href;
+  syncMediatorTargets();
 
-  if (
-    shouldShow &&
-    config.mediatorUrl &&
-    !String(config.mediatorUrl).includes(".invalid")
-  ) {
-    window.open(config.mediatorUrl, "_blank", "noopener,noreferrer");
+  if (!shouldShow) {
+    mediatorDialogAutoOpened = false;
+    closeMediatorDialog();
+    return;
+  }
+
+  if (!mediatorDialogAutoOpened && hasValidMediatorUrl()) {
+    mediatorDialogAutoOpened = true;
+    openMediatorExperience();
   }
 }
 
@@ -265,6 +327,8 @@ function handleFormReset() {
   window.requestAnimationFrame(() => {
     updateResidenceVisibility();
     updateOtherVisibility();
+    mediatorDialogAutoOpened = false;
+    closeMediatorDialog();
     updateMediatorCallout();
     updateNeedCounters();
     updateProgress();
@@ -311,6 +375,14 @@ function bindEvents() {
     submissionDialog.close();
   });
 
+  mediatorOpenButton?.addEventListener("click", () => {
+    openMediatorExperience();
+  });
+
+  mediatorClose?.addEventListener("click", () => {
+    closeMediatorDialog();
+  });
+
   submissionDialog.addEventListener("click", (event) => {
     const rect = submissionDialog.getBoundingClientRect();
     const clickedOutside =
@@ -321,6 +393,19 @@ function bindEvents() {
 
     if (clickedOutside) {
       submissionDialog.close();
+    }
+  });
+
+  mediatorDialog?.addEventListener("click", (event) => {
+    const rect = mediatorDialog.getBoundingClientRect();
+    const clickedOutside =
+      event.clientX < rect.left ||
+      event.clientX > rect.right ||
+      event.clientY < rect.top ||
+      event.clientY > rect.bottom;
+
+    if (clickedOutside) {
+      closeMediatorDialog();
     }
   });
 

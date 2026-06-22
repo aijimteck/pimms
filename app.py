@@ -30,7 +30,12 @@ BASE_DIR = Path(__file__).resolve().parent
 INSTANCE_DIR = BASE_DIR / "instance"
 ENV_PATH = BASE_DIR / ".env"
 STATIC_DIR = BASE_DIR / "static"
-DEFAULT_MEDIATOR_URL = "https://reference-url-citation.invalid/0"
+DEFAULT_MEDIATOR_URL = "https://iwana.fr/share/widget/get/9093160"
+LEGACY_MEDIATOR_URLS = {
+    "",
+    "https://reference-url-citation.invalid/0",
+    "https://www.noisylegrand.fr/vos-services/solidarite-et-accompagnement/acces-au-droit/point-dinformation-mediation-multi-services",
+}
 
 RAW_DB_PATH = os.getenv("PIMMS_DB_PATH", str(INSTANCE_DIR / "pimms.sqlite3"))
 DB_PATH = Path(RAW_DB_PATH)
@@ -282,7 +287,10 @@ app.config["ADMIN_PASSWORD"] = read_or_create_secret(
     "ADMIN_PASSWORD",
     fallback_length=18,
 )
-app.config["MEDIATOR_URL"] = os.getenv("MEDIATOR_URL", DEFAULT_MEDIATOR_URL)
+configured_mediator_url = os.getenv("MEDIATOR_URL", "").strip()
+if configured_mediator_url in LEGACY_MEDIATOR_URLS:
+    configured_mediator_url = DEFAULT_MEDIATOR_URL
+app.config["MEDIATOR_URL"] = configured_mediator_url
 app.config["REPORTING_NAME"] = os.getenv("REPORTING_NAME", "Tableau des réponses")
 
 

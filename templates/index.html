@@ -363,18 +363,23 @@
             <div class="callout" id="mediator-callout" hidden>
               <strong>Prise de rendez-vous</strong>
               <p>
-                Si besoin, le lien de prise de rendez-vous peut s'ouvrir
-                automatiquement après la sélection de ce niveau d'aide.
+                Le module de prise de rendez-vous peut s'ouvrir directement
+                dans cette page pour éviter de quitter le formulaire.
               </p>
-              <a
-                id="mediator-link"
-                class="button button--secondary"
-                href="{{ mediator_url }}"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                Prendre rendez-vous avec un médiateur social
-              </a>
+              <div class="callout__actions">
+                <button type="button" class="button button--primary" id="mediator-open">
+                  Ouvrir le module de rendez-vous
+                </button>
+                <a
+                  id="mediator-link"
+                  class="button button--secondary"
+                  href="{{ mediator_url }}"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  Ouvrir dans un nouvel onglet
+                </a>
+              </div>
             </div>
 
             <fieldset class="field-group">
@@ -513,6 +518,41 @@
           <span class="success-card__label">Identifiant attribué</span>
           <strong id="submission-id">-</strong>
           <span class="success-card__meta" id="submission-timestamp"></span>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="mediator-dialog" class="dialog dialog--wide">
+      <div class="dialog__content dialog__content--compact">
+        <div class="dialog__header">
+          <h2>Prendre rendez-vous avec un médiateur social</h2>
+          <button type="button" class="dialog__close" id="mediator-close">
+            Fermer
+          </button>
+        </div>
+        <p class="dialog__intro">
+          Le module de rendez-vous s'affiche ci-dessous. Si besoin, vous pouvez
+          aussi l'ouvrir dans un onglet séparé.
+        </p>
+        <div class="embed-frame-shell">
+          <iframe
+            id="mediator-frame"
+            class="embed-frame"
+            title="Module de prise de rendez-vous Iwana"
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"
+          ></iframe>
+        </div>
+        <div class="dialog__actions">
+          <a
+            id="mediator-link-dialog"
+            class="button button--secondary"
+            href="{{ mediator_url }}"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            Ouvrir dans un nouvel onglet
+          </a>
         </div>
       </div>
     </dialog>
