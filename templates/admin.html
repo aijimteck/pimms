@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ reporting_name }} | Administration</title>
+    <style>{{ inline_styles | safe }}</style>
+  </head>
+  <body class="admin-body">
+    <div class="page-shell page-shell--admin">
+      <header class="hero hero--admin">
+        <div class="hero__banner" aria-hidden="true"></div>
+        <div class="hero__content hero__content--compact">
+          <div class="admin-topbar">
+            <div>
+              <p class="hero__eyebrow">Administration</p>
+              <h1>{{ reporting_name }}</h1>
+              <p class="hero__intro">
+                Tableau des réponses centralisé avec identifiants auto-incrémentés.
+              </p>
+            </div>
+            <form method="post" action="{{ url_for('index', mode='tableau') }}">
+              <input type="hidden" name="admin_action" value="logout" />
+              <button class="button button--ghost" type="submit">Déconnexion</button>
+            </form>
+          </div>
+        </div>
+      </header>
+
+      <section class="admin-summary">
+        <article class="metric-card">
+          <span>Total</span>
+          <strong>{{ stats.total }}</strong>
+        </article>
+        <article class="metric-card">
+          <span>Aujourd'hui</span>
+          <strong>{{ stats.today }}</strong>
+        </article>
+        <article class="metric-card">
+          <span>Habitants de Noisy</span>
+          <strong>{{ stats.noisy }}</strong>
+        </article>
+        <article class="metric-card">
+          <span>Besoin médiateur</span>
+          <strong>{{ stats.mediator }}</strong>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="admin-toolbar">
+          <form class="admin-search" method="get" action="{{ url_for('index') }}">
+            <input type="hidden" name="mode" value="tableau" />
+            <input
+              type="search"
+              name="q"
+              value="{{ search_text }}"
+              placeholder="Rechercher par nom, ville, démarche, niveau d'aide..."
+            />
+            <button class="button button--primary" type="submit">Filtrer</button>
+          </form>
+          <a class="button button--secondary" href="{{ url_for('admin_export_csv', q=search_text) }}">
+            Télécharger le CSV
+          </a>
+        </div>
+
+        <div class="helper-stack">
+          <p class="helper">
+            Mot de passe administrateur enregistré dans :
+            <code>{{ admin_password_path }}</code>
+          </p>
+          <p class="helper">
+            Chaque réponse reçoit un identifiant unique, croissant, à partir de 1.
+          </p>
+        </div>
+
+        {% if submissions %}
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Identité</th>
+                <th>Résidence</th>
+                <th>Démarches</th>
+                <th>Aide</th>
+                <th>Temps</th>
+                <th>Contact</th>
+                <th>Détails</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for submission in submissions %}
+              <tr>
+                <td>#{{ submission.id }}</td>
+                <td>{{ submission.submitted_at }}</td>
+                <td>
+                  <strong>{{ submission.last_name }} {{ submission.first_name }}</strong>
+                  <div class="table-meta">
+                    {{ submission.birth_date_display }} · {{ submission.gender }}
+                  </div>
+                </td>
+                <td>
+                  {% if submission.noisy_resident == "Oui" %}
+                  Noisy-le-Grand · {{ submission.district or "Non précisé" }}
+                  {% else %}
+                  {{ submission.city or "Ville non précisée" }}
+                  {% endif %}
+                  <div class="table-meta">
+                    Première visite : {{ submission.first_visit or "Non renseigné" }}
+                  </div>
+                </td>
+                <td class="data-table__wide">{{ submission.needs_summary }}</td>
+                <td>
+                  {{ submission.help_level }}
+                  <div class="table-meta">
+                    Impression : {{ submission.need_print or "Non renseigné" }}<br />
+                    Scan : {{ submission.need_scan or "Non renseigné" }}
+                  </div>
+                </td>
+                <td>{{ submission.time_needed }}</td>
+                <td>
+                  {{ submission.phone or "—" }}
+                  <div class="table-meta">
+                    RSA : {{ submission.rsa or "Non renseigné" }}
+                  </div>
+                </td>
+                <td>
+                  <details class="row-details">
+                    <summary>Voir</summary>
+                    <div class="row-details__content">
+                      {% for group_name, items in submission.needs_grouped.items() %}
+                      <p><strong>{{ group_name }}</strong> : {{ items | join(", ") }}</p>
+                      {% endfor %}
+                      {% if submission.other_request %}
+                      <p><strong>Autre demande</strong> : {{ submission.other_request }}</p>
+                      {% endif %}
+                      <p><strong>IP source</strong> : {{ submission.source_ip or "Non disponible" }}</p>
+                      <pre>{{ submission.payload_pretty }}</pre>
+                    </div>
+                  </details>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <h2>Aucune réponse</h2>
+          <p>
+            Le tableau se remplira automatiquement dès qu'un formulaire sera soumis.
+          </p>
+        </div>
+        {% endif %}
+      </section>
+    </div>
+  </body>
+</html>

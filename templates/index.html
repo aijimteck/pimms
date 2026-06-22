@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formulaire d'accueil PIMMS Médiation Noisy-le-Grand</title>
+    <meta
+      name="description"
+      content="Formulaire d'accueil PIMMS Médiation Noisy-le-Grand"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23053870'/%3E%3Cpath d='M18 18h28v28H18z' fill='%23fff' opacity='.12'/%3E%3Cpath d='M23 18h18a5 5 0 0 1 5 5v18a5 5 0 0 1-5 5H23a5 5 0 0 1-5-5V23a5 5 0 0 1 5-5Z' fill='%23fff'/%3E%3Cpath d='M27 27h10c4.4 0 8 3.6 8 8s-3.6 8-8 8H27z' fill='%23053870'/%3E%3C/svg%3E"
+    />
+    <style>{{ inline_styles | safe }}</style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero__banner" aria-hidden="true"></div>
+        <div class="hero__content">
+          <p class="hero__eyebrow">Formulaire d'accueil</p>
+          <h1>FORMULAIRE D'ACCUEIL PIMMS MÉDIATION NOISY-LE-GRAND</h1>
+          <p class="hero__intro">
+            Merci de renseigner ce formulaire avant votre passage à l'espace
+            d'accompagnement. Les réponses permettent de mieux orienter votre
+            accueil.
+          </p>
+          <div class="hero__meta">
+            <span>Temps estimé : 1 à 2 minutes</span>
+            <span>Réponse rapide</span>
+            <span>Compatible mobile</span>
+          </div>
+          <div class="progress-card" aria-live="polite">
+            <div class="progress-card__header">
+              <strong>Avancement</strong>
+              <span id="progress-text">0 % rempli</span>
+            </div>
+            <div class="progress-bar" aria-hidden="true">
+              <div class="progress-bar__fill" id="progress-fill"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <form id="intake-form" class="form" novalidate>
+          <section class="panel">
+            <div class="panel__heading">
+              <h2>Identité</h2>
+            </div>
+
+            <div class="field-grid field-grid--two">
+              <div class="field">
+                <label for="last-name">Nom <span class="required">*</span></label>
+                <input id="last-name" name="lastName" type="text" required />
+              </div>
+
+              <div class="field">
+                <label for="first-name"
+                  >Prénom <span class="required">*</span></label
+                >
+                <input id="first-name" name="firstName" type="text" required />
+              </div>
+            </div>
+
+            <fieldset class="field-group">
+              <legend>Date de naissance <span class="required">*</span></legend>
+              <p class="helper">Sélection simplifiée</p>
+              <div class="field-grid field-grid--three">
+                <div class="field">
+                  <label for="birth-day">Jour</label>
+                  <select id="birth-day" name="birthDay" required>
+                    <option value="">Jour</option>
+                    {% for day in range(1, 32) %}
+                    <option value="{{ day }}">{{ day }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="birth-month">Mois</label>
+                  <select id="birth-month" name="birthMonth" required>
+                    <option value="">Mois</option>
+                    {% for month in months %}
+                    <option value="{{ month }}">{{ month }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="birth-year">Année</label>
+                  <select id="birth-year" name="birthYear" required>
+                    <option value="">Année</option>
+                    {% for year in years %}
+                    <option value="{{ year }}">{{ year }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="field-group">
+              <legend>Genre <span class="required">*</span></legend>
+              <div class="choice-grid choice-grid--compact">
+                <label class="choice-card">
+                  <input type="radio" name="gender" value="Homme" required />
+                  <span>Homme</span>
+                </label>
+                <label class="choice-card">
+                  <input type="radio" name="gender" value="Femme" />
+                  <span>Femme</span>
+                </label>
+                <label class="choice-card">
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="Préfère ne pas répondre"
+                  />
+                  <span>Préfère ne pas répondre</span>
+                </label>
+              </div>
+            </fieldset>
+          </section>
+
+          <section class="panel">
+            <div class="panel__heading">
+              <h2>Lieu de résidence</h2>
+            </div>
+
+            <fieldset class="field-group">
+              <legend>
+                Habitez-vous à Noisy-le-Grand ? <span class="required">*</span>
+              </legend>
+              <div class="choice-grid choice-grid--compact">
+                <label class="choice-card">
+                  <input type="radio" name="noisyResident" value="Oui" required />
+                  <span>Oui</span>
+                </label>
+                <label class="choice-card">
+                  <input type="radio" name="noisyResident" value="Non" />
+                  <span>Non</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="conditional-block" id="city-block" hidden>
+              <div class="field">
+                <label for="city">Ville <span class="required">*</span></label>
+                <input
+                  id="city"
+                  name="city"
+                  type="text"
+                  list="city-list"
+                  placeholder="Rechercher ma ville"
+                />
+                <datalist id="city-list">
+                  {% for city in city_suggestions %}
+                  <option value="{{ city }}"></option>
+                  {% endfor %}
+                </datalist>
+              </div>
+              <div class="list-card">
+                <p class="list-card__title">Liste triée par fréquence</p>
+                <ul id="city-shortlist" class="pill-list">
+                  {% for city in city_suggestions %}
+                  <li><button type="button" data-city="{{ city }}">{{ city }}</button></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+
+            <div class="conditional-block" id="district-block" hidden>
+              <div class="inline-note">
+                <span class="inline-note__label">Quartier</span>
+                <button
+                  type="button"
+                  class="link-button"
+                  id="district-map-toggle"
+                  aria-expanded="false"
+                  aria-controls="district-map-note"
+                >
+                  Voir la carte des quartiers
+                </button>
+              </div>
+              <div class="choice-grid choice-grid--two">
+                {% for district in districts %}
+                <label class="choice-card">
+                  <input type="radio" name="district" value="{{ district }}" />
+                  <span>{{ district }}</span>
+                </label>
+                {% endfor %}
+              </div>
+              <p class="helper helper--hidden" id="district-map-note">
+                Ajoutez ici le lien ou le visuel de votre carte des quartiers
+                si vous souhaitez un renvoi direct depuis le formulaire.
+              </p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__heading">
+              <h2>Visite et besoins</h2>
+            </div>
+
+            <fieldset class="field-group">
+              <legend>Est-ce votre première visite au PIMMS ?</legend>
+              <div class="choice-grid choice-grid--compact">
+                <label class="choice-card">
+                  <input type="radio" name="firstVisit" value="Oui" />
+                  <span>Oui</span>
+                </label>
+                <label class="choice-card">
+                  <input type="radio" name="firstVisit" value="Non" />
+                  <span>Non</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="panel__subheading">
+              <h3>Que souhaitez-vous faire aujourd'hui ?</h3>
+              <p>Cochez toutes les démarches prévues aujourd'hui.</p>
+            </div>
+
+            <p class="validation-message" id="needs-validation-message" hidden>
+              Sélectionnez au moins une démarche.
+            </p>
+
+            <div id="needs-groups" class="accordion-list">
+              {% for group in needs_groups %}
+              <details class="accordion" {% if loop.index0 < 3 %}open{% endif %}>
+                <summary>
+                  <span class="accordion__meta">
+                    <span class="accordion__badge">{{ group["badge"] }}</span>
+                    <span>{{ group["title"] }}</span>
+                  </span>
+                  <span class="accordion__count" data-group-count="{{ group["name"] }}">0</span>
+                </summary>
+                <div class="accordion__content">
+                  <div class="checkbox-grid">
+                    {% for item in group["items"] %}
+                    <label class="choice-card">
+                      <input
+                        type="checkbox"
+                        name="needs"
+                        value="{{ item }}"
+                        data-group="{{ group["name"] }}"
+                        {% if item == "Autre démarche" %}data-other-trigger="true"{% endif %}
+                      />
+                      <span>{{ item }}</span>
+                    </label>
+                    {% endfor %}
+                  </div>
+                </div>
+              </details>
+              {% endfor %}
+            </div>
+
+            <div
+              class="conditional-block conditional-block--muted"
+              id="other-block"
+              hidden
+            >
+              <div class="field">
+                <label for="other-request"
+                  >Décrivez votre demande <span class="required">*</span></label
+                >
+                <textarea
+                  id="other-request"
+                  name="otherRequest"
+                  rows="4"
+                  placeholder="Précisez la démarche concernée"
+                ></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel__heading">
+              <h2>Organisation de l'accompagnement</h2>
+            </div>
+
+            <div class="field-grid field-grid--two">
+              <fieldset class="field-group">
+                <legend>Aurez-vous besoin d'imprimer un document ?</legend>
+                <div class="choice-grid choice-grid--compact">
+                  <label class="choice-card">
+                    <input type="radio" name="needPrint" value="Oui" />
+                    <span>Oui</span>
+                  </label>
+                  <label class="choice-card">
+                    <input
+                      type="radio"
+                      name="needPrint"
+                      value="Non / Je ne sais pas"
+                    />
+                    <span>Non / Je ne sais pas</span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset class="field-group">
+                <legend>Aurez-vous besoin de scanner un document ?</legend>
+                <div class="choice-grid choice-grid--compact">
+                  <label class="choice-card">
+                    <input type="radio" name="needScan" value="Oui" />
+                    <span>Oui</span>
+                  </label>
+                  <label class="choice-card">
+                    <input
+                      type="radio"
+                      name="needScan"
+                      value="Non / Je ne sais pas"
+                    />
+                    <span>Non / Je ne sais pas</span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+
+            <fieldset class="field-group">
+              <legend>
+                De quel niveau d'aide pensez-vous avoir besoin ?
+                <span class="required">*</span>
+              </legend>
+              <div class="choice-grid choice-grid--stacked" id="help-levels">
+                <label class="choice-card choice-card--tone-1">
+                  <input
+                    type="radio"
+                    name="helpLevel"
+                    value="Je souhaite utiliser un ordinateur seul"
+                    required
+                  />
+                  <span>Je souhaite utiliser un ordinateur seul</span>
+                </label>
+                <label class="choice-card choice-card--tone-2">
+                  <input
+                    type="radio"
+                    name="helpLevel"
+                    value="J'ai besoin d'un peu d'aide"
+                  />
+                  <span>J'ai besoin d'un peu d'aide</span>
+                </label>
+                <label class="choice-card choice-card--tone-3">
+                  <input
+                    type="radio"
+                    name="helpLevel"
+                    value="J'ai besoin d'un accompagnement complet"
+                  />
+                  <span>J'ai besoin d'un accompagnement complet</span>
+                </label>
+                <label class="choice-card choice-card--tone-4">
+                  <input
+                    type="radio"
+                    name="helpLevel"
+                    value="J'ai besoin de prendre rendez-vous avec un médiateur social"
+                  />
+                  <span>J'ai besoin de prendre rendez-vous avec un médiateur social</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="callout" id="mediator-callout" hidden>
+              <strong>Prise de rendez-vous</strong>
+              <p>
+                Si besoin, le lien de prise de rendez-vous peut s'ouvrir
+                automatiquement après la sélection de ce niveau d'aide.
+              </p>
+              <a
+                id="mediator-link"
+                class="button button--secondary"
+                href="{{ mediator_url }}"
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                Prendre rendez-vous avec un médiateur social
+              </a>
+            </div>
+
+            <fieldset class="field-group">
+              <legend>
+                Combien de temps pensez-vous avoir besoin ?
+                <span class="required">*</span>
+              </legend>
+              <div class="choice-grid choice-grid--stacked">
+                <label class="choice-card choice-card--tone-1">
+                  <input
+                    type="radio"
+                    name="timeNeeded"
+                    value="Moins de 10 minutes"
+                    required
+                  />
+                  <span>Moins de 10 minutes</span>
+                </label>
+                <label class="choice-card choice-card--tone-2">
+                  <input
+                    type="radio"
+                    name="timeNeeded"
+                    value="10 à 30 minutes"
+                  />
+                  <span>10 à 30 minutes</span>
+                </label>
+                <label class="choice-card choice-card--tone-3">
+                  <input
+                    type="radio"
+                    name="timeNeeded"
+                    value="30 minutes à 1 heure"
+                  />
+                  <span>30 minutes à 1 heure</span>
+                </label>
+                <label class="choice-card choice-card--tone-4">
+                  <input
+                    type="radio"
+                    name="timeNeeded"
+                    value="1 heure à 2 heures"
+                  />
+                  <span>1 heure à 2 heures</span>
+                </label>
+                <label class="choice-card choice-card--tone-5">
+                  <input type="radio" name="timeNeeded" value="Plus de 2 heures" />
+                  <span>Plus de 2 heures</span>
+                </label>
+              </div>
+            </fieldset>
+          </section>
+
+          <section class="panel">
+            <div class="panel__heading">
+              <h2>Informations facultatives</h2>
+            </div>
+
+            <fieldset class="field-group">
+              <legend>Êtes-vous bénéficiaire du RSA ?</legend>
+              <div class="choice-grid choice-grid--compact">
+                <label class="choice-card">
+                  <input type="radio" name="rsa" value="Oui" />
+                  <span>Oui</span>
+                </label>
+                <label class="choice-card">
+                  <input type="radio" name="rsa" value="Non" />
+                  <span>Non</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="field">
+              <label for="phone">Téléphone</label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                placeholder="06 00 00 00 00"
+              />
+            </div>
+          </section>
+
+          <footer class="form-actions">
+            <button type="reset" class="button button--ghost">Réinitialiser</button>
+            <button type="submit" class="button button--primary">
+              Enregistrer la réponse
+            </button>
+          </footer>
+        </form>
+
+        <aside class="side-panel">
+          <section class="side-card">
+            <h2>Repères</h2>
+            <ul class="plain-list">
+              <li>Les champs marqués d'un astérisque sont obligatoires.</li>
+              <li>Les choix multiples sont proposés sous forme de cases à cocher.</li>
+              <li>Les champs supplémentaires n'apparaissent qu'en cas de besoin.</li>
+            </ul>
+          </section>
+
+          <section class="side-card">
+            <h2>Confidentialité</h2>
+            <p>
+              Les informations utiles à l'accueil peuvent être transmises à
+              l'équipe d'accompagnement selon votre circuit de prise en charge.
+            </p>
+          </section>
+
+          {% if admin_available %}
+          <section class="side-card">
+            <h2>Suivi interne</h2>
+            <p>
+              Les réponses enregistrées alimentent un tableau de suivi sécurisé
+              accessible depuis l'espace d'administration.
+            </p>
+            <a class="button button--secondary" href="{{ url_for('index', mode='tableau') }}">
+              Ouvrir l'administration
+            </a>
+          </section>
+          {% endif %}
+        </aside>
+      </main>
+    </div>
+
+    <dialog id="submission-dialog" class="dialog">
+      <div class="dialog__content">
+        <div class="dialog__header">
+          <h2 id="dialog-title">Réponse enregistrée</h2>
+          <button type="button" class="dialog__close" id="dialog-close">
+            Fermer
+          </button>
+        </div>
+        <p class="dialog__intro" id="dialog-message">
+          La réponse a bien été enregistrée.
+        </p>
+        <div class="success-card">
+          <span class="success-card__label">Identifiant attribué</span>
+          <strong id="submission-id">-</strong>
+          <span class="success-card__meta" id="submission-timestamp"></span>
+        </div>
+      </div>
+    </dialog>
+
+    <script>
+      window.PIMMS_CONFIG = {
+        mediatorUrl: {{ mediator_url | tojson }},
+        submissionEndpoint: {{ url_for('create_submission') | tojson }}
+      };
+    </script>
+    <script>{{ inline_script | safe }}</script>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: pimms-formulaire
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    healthCheckPath: /api/health
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: PIMMS_DB_PATH
+        value: /var/data/pimms.sqlite3
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: MEDIATOR_URL
+        sync: false

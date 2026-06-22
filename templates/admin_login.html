@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connexion administration</title>
+    <style>{{ inline_styles | safe }}</style>
+  </head>
+  <body class="login-body">
+    <main class="login-shell">
+      <section class="login-card">
+        <p class="hero__eyebrow">Administration</p>
+        <h1>Accès au tableau des réponses</h1>
+        <p class="hero__intro">
+          Saisissez le mot de passe administrateur pour consulter les reportings.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-stack">
+          {% for category, message in messages %}
+          <p class="validation-message">{{ message }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <form method="post" action="{{ next_url }}" class="login-form">
+          <input type="hidden" name="admin_action" value="login" />
+          <div class="field">
+            <label for="password">Mot de passe</label>
+            <input id="password" name="password" type="password" required autofocus />
+          </div>
+          <button class="button button--primary" type="submit">Se connecter</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

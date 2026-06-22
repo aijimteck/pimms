@@ -1,0 +1,8 @@
+__pycache__/
+instance/
+*.log
+.venv/
+.env
+*.log
+public-admin-login.html
+public-admin.cookies.txt
