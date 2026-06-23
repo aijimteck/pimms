@@ -16,17 +16,23 @@ const mediatorDialogLink = document.querySelector("#mediator-link-dialog");
 const progressFill = document.querySelector("#progress-fill");
 const progressText = document.querySelector("#progress-text");
 const needsValidationMessage = document.querySelector("#needs-validation-message");
+const needsFilterInput = document.querySelector("#needs-filter");
+const needsFilterStatus = document.querySelector("#needs-filter-status");
 const submissionDialog = document.querySelector("#submission-dialog");
 const submissionIdNode = document.querySelector("#submission-id");
 const submissionTimestampNode = document.querySelector("#submission-timestamp");
 const dialogMessage = document.querySelector("#dialog-message");
 const dialogClose = document.querySelector("#dialog-close");
 const districtMapToggle = document.querySelector("#district-map-toggle");
-const districtMapNote = document.querySelector("#district-map-note");
+const districtMapDialog = document.querySelector("#district-map-dialog");
+const districtMapClose = document.querySelector("#district-map-close");
+const districtGuidePreviewName = document.querySelector("#district-guide-preview-name");
+const districtGuidePreviewText = document.querySelector("#district-guide-preview-text");
 const submitButton = form?.querySelector('button[type="submit"]');
 
 const groupCountNodes = Array.from(document.querySelectorAll("[data-group-count]"));
 const trackedGroups = groupCountNodes.map((node) => node.dataset.groupCount);
+const accordionNodes = Array.from(document.querySelectorAll(".accordion"));
 const mediatorHelpLevelKey =
   "j'ai besoin de prendre rendez-vous avec un mediateur social";
 
@@ -76,6 +82,10 @@ function updateResidenceVisibility() {
       input.checked = false;
     }
   });
+
+  if (!showDistrict) {
+    closeDistrictMapDialog();
+  }
 }
 
 function updateOtherVisibility() {
@@ -88,6 +98,91 @@ function updateOtherVisibility() {
   if (!otherChecked) {
     otherRequestField.value = "";
   }
+}
+
+function setDistrictGuidePreview(name, hint) {
+  if (!districtGuidePreviewName || !districtGuidePreviewText) {
+    return;
+  }
+
+  if (!name || !hint) {
+    districtGuidePreviewName.textContent = "Sélectionnez un quartier sur la carte";
+    districtGuidePreviewText.textContent =
+      "Une recommandation de sélection apparaîtra ici.";
+    return;
+  }
+
+  districtGuidePreviewName.textContent = name;
+  districtGuidePreviewText.textContent = hint;
+}
+
+function syncDistrictGuideState() {
+  const selectedValue = form.elements.district?.value || "";
+  districtMapDialog?.querySelectorAll("[data-district-select]").forEach((node) => {
+    node.dataset.active =
+      selectedValue && node.dataset.districtSelect === selectedValue ? "true" : "false";
+  });
+}
+
+function readDistrictMetadata(trigger) {
+  if (!trigger) {
+    return { name: "", hint: "" };
+  }
+
+  return {
+    name: trigger.dataset.districtName || trigger.dataset.districtSelect || "",
+    hint: trigger.dataset.districtHint || "",
+  };
+}
+
+function selectDistrictValue(districtValue, trigger) {
+  const input = Array.from(form.querySelectorAll('input[name="district"]')).find(
+    (field) => field.value === districtValue
+  );
+  if (!input) {
+    return;
+  }
+
+  input.checked = true;
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  syncDistrictGuideState();
+
+  const metadata = readDistrictMetadata(trigger);
+  setDistrictGuidePreview(metadata.name, metadata.hint);
+  closeDistrictMapDialog();
+  updateProgress();
+}
+
+function openDistrictMapDialog() {
+  if (!districtMapDialog || typeof districtMapDialog.showModal !== "function") {
+    return;
+  }
+
+  if (!districtMapDialog.open) {
+    districtMapDialog.showModal();
+  }
+
+  districtMapToggle?.setAttribute("aria-expanded", "true");
+  syncDistrictGuideState();
+
+  const selectedValue = form.elements.district?.value || "";
+  const selectedTrigger = selectedValue
+    ? districtMapDialog.querySelector(
+        `[data-district-select="${selectedValue.replace(/"/g, '\\"')}"]`
+      )
+    : null;
+  const metadata = readDistrictMetadata(selectedTrigger);
+  setDistrictGuidePreview(metadata.name, metadata.hint);
+}
+
+function closeDistrictMapDialog() {
+  if (!districtMapDialog?.open) {
+    districtMapToggle?.setAttribute("aria-expanded", "false");
+    return;
+  }
+
+  districtMapDialog.close();
+  districtMapToggle?.setAttribute("aria-expanded", "false");
 }
 
 function hasValidMediatorUrl() {
@@ -168,6 +263,55 @@ function validateNeeds(showMessage) {
   const hasSelection = form.querySelectorAll('input[name="needs"]:checked').length > 0;
   needsValidationMessage.hidden = hasSelection || !showMessage;
   return hasSelection;
+}
+
+function applyNeedsFilter() {
+  const query = normalizeText(needsFilterInput?.value);
+  let visibleItems = 0;
+  let visibleGroups = 0;
+
+  accordionNodes.forEach((accordion) => {
+    const cards = Array.from(accordion.querySelectorAll(".checkbox-grid .choice-card"));
+    let groupHasMatch = false;
+
+    cards.forEach((card) => {
+      const matches = !query || normalizeText(card.textContent).includes(query);
+      card.hidden = !matches;
+      if (matches) {
+        groupHasMatch = true;
+        visibleItems += 1;
+      }
+    });
+
+    accordion.hidden = !groupHasMatch;
+    accordion.open = query ? groupHasMatch : false;
+
+    if (groupHasMatch) {
+      visibleGroups += 1;
+    }
+  });
+
+  if (!needsFilterStatus) {
+    return;
+  }
+
+  if (!query) {
+    needsFilterStatus.textContent =
+      "Tapez un mot-clé pour afficher plus vite les démarches utiles.";
+    return;
+  }
+
+  if (!visibleItems) {
+    needsFilterStatus.textContent =
+      "Aucune démarche ne correspond à cette recherche.";
+    return;
+  }
+
+  const itemSuffix = visibleItems > 1 ? "s" : "";
+  const groupSuffix = visibleGroups > 1 ? "s" : "";
+  needsFilterStatus.textContent =
+    `${visibleItems} démarche${itemSuffix} affichée${itemSuffix} dans ` +
+    `${visibleGroups} catégorie${groupSuffix}.`;
 }
 
 function updateProgress() {
@@ -325,16 +469,21 @@ async function submitForm() {
 
 function handleFormReset() {
   window.requestAnimationFrame(() => {
+    if (needsFilterInput) {
+      needsFilterInput.value = "";
+    }
     updateResidenceVisibility();
     updateOtherVisibility();
     mediatorDialogAutoOpened = false;
     closeMediatorDialog();
+    closeDistrictMapDialog();
+    setDistrictGuidePreview("", "");
     updateMediatorCallout();
     updateNeedCounters();
+    applyNeedsFilter();
+    syncDistrictGuideState();
     updateProgress();
     needsValidationMessage.hidden = true;
-    districtMapNote.classList.add("helper--hidden");
-    districtMapToggle.setAttribute("aria-expanded", "false");
   });
 }
 
@@ -355,6 +504,10 @@ function bindEvents() {
 
     if (event.target.name === "helpLevel") {
       updateMediatorCallout();
+    }
+
+    if (event.target.name === "district") {
+      syncDistrictGuideState();
     }
 
     updateProgress();
@@ -409,10 +562,70 @@ function bindEvents() {
     }
   });
 
-  districtMapToggle.addEventListener("click", () => {
-    const expanded = districtMapToggle.getAttribute("aria-expanded") === "true";
-    districtMapToggle.setAttribute("aria-expanded", String(!expanded));
-    districtMapNote.classList.toggle("helper--hidden");
+  districtMapToggle?.addEventListener("click", () => {
+    openDistrictMapDialog();
+  });
+
+  districtMapClose?.addEventListener("click", () => {
+    closeDistrictMapDialog();
+  });
+
+  districtMapDialog?.addEventListener("click", (event) => {
+    const rect = districtMapDialog.getBoundingClientRect();
+    const clickedOutside =
+      event.clientX < rect.left ||
+      event.clientX > rect.right ||
+      event.clientY < rect.top ||
+      event.clientY > rect.bottom;
+
+    if (clickedOutside) {
+      closeDistrictMapDialog();
+    }
+  });
+
+  districtMapDialog?.addEventListener("mouseover", (event) => {
+    const trigger = event.target.closest("[data-district-select]");
+    if (!trigger) {
+      return;
+    }
+    const metadata = readDistrictMetadata(trigger);
+    setDistrictGuidePreview(metadata.name, metadata.hint);
+  });
+
+  districtMapDialog?.addEventListener("focusin", (event) => {
+    const trigger = event.target.closest("[data-district-select]");
+    if (!trigger) {
+      return;
+    }
+    const metadata = readDistrictMetadata(trigger);
+    setDistrictGuidePreview(metadata.name, metadata.hint);
+  });
+
+  districtMapDialog?.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-district-select]");
+    if (!trigger) {
+      return;
+    }
+
+    selectDistrictValue(trigger.dataset.districtSelect, trigger);
+  });
+
+  districtMapDialog?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    const trigger = event.target.closest("[data-district-select]");
+    if (!trigger) {
+      return;
+    }
+
+    event.preventDefault();
+    selectDistrictValue(trigger.dataset.districtSelect, trigger);
+  });
+
+  districtMapDialog?.addEventListener("close", () => {
+    districtMapToggle?.setAttribute("aria-expanded", "false");
   });
 
   document.querySelector("#city-shortlist")?.addEventListener("click", (event) => {
@@ -424,6 +637,10 @@ function bindEvents() {
     cityInput.focus();
     updateProgress();
   });
+
+  needsFilterInput?.addEventListener("input", () => {
+    applyNeedsFilter();
+  });
 }
 
 bindEvents();
@@ -431,4 +648,6 @@ updateResidenceVisibility();
 updateOtherVisibility();
 updateMediatorCallout();
 updateNeedCounters();
+applyNeedsFilter();
+syncDistrictGuideState();
 updateProgress();

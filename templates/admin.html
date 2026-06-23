@@ -71,6 +71,9 @@
           <p class="helper">
             Chaque réponse reçoit un identifiant unique, croissant, à partir de 1.
           </p>
+          <p class="helper">
+            Les réponses de plus de {{ retention_days }} jours sont supprimées automatiquement.
+          </p>
         </div>
 
         {% if submissions %}

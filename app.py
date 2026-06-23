@@ -6,7 +6,7 @@ import json
 import os
 import secrets
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 from pathlib import Path
 from typing import Any
@@ -30,12 +30,15 @@ BASE_DIR = Path(__file__).resolve().parent
 INSTANCE_DIR = BASE_DIR / "instance"
 ENV_PATH = BASE_DIR / ".env"
 STATIC_DIR = BASE_DIR / "static"
+DISTRICT_MAP_DATA_PATH = STATIC_DIR / "data" / "noisy-quartiers.geojson"
+DISTRICT_MAP_SOURCE_URL = "https://opendata.noisylegrand.fr/explore/dataset/quartiers-de-noisy-le-grand/"
 DEFAULT_MEDIATOR_URL = "https://iwana.fr/share/widget/get/9093160"
 LEGACY_MEDIATOR_URLS = {
     "",
     "https://reference-url-citation.invalid/0",
     "https://www.noisylegrand.fr/vos-services/solidarite-et-accompagnement/acces-au-droit/point-dinformation-mediation-multi-services",
 }
+SUBMISSION_RETENTION_DAYS = 14
 
 RAW_DB_PATH = os.getenv("PIMMS_DB_PATH", str(INSTANCE_DIR / "pimms.sqlite3"))
 DB_PATH = Path(RAW_DB_PATH)
@@ -72,6 +75,85 @@ FORM_DISTRICTS = [
     "Villeflix",
     "Je ne sais pas",
 ]
+
+DISTRICT_GUIDE = [
+    {
+        "official_name": "Le Centre",
+        "form_label": "Centre-ville",
+        "hint": "Sélection conseillée dans ce formulaire : « Centre-ville ».",
+    },
+    {
+        "official_name": "Le Marnois",
+        "form_label": "Marnois",
+        "hint": "Sélection conseillée dans ce formulaire : « Marnois ».",
+    },
+    {
+        "official_name": "La Grenouillère",
+        "form_label": "Je ne sais pas",
+        "hint": "Ce quartier officiel n'apparaît pas tel quel dans le formulaire. En cas de doute, choisissez « Je ne sais pas ».",
+    },
+    {
+        "official_name": "Les Richardets - Montfort",
+        "form_label": "Richardets",
+        "hint": "Sélection conseillée dans ce formulaire : « Richardets ».",
+    },
+    {
+        "official_name": "Le Pavé Neuf",
+        "form_label": "Pavé Neuf",
+        "hint": "Sélection conseillée dans ce formulaire : « Pavé Neuf ».",
+    },
+    {
+        "official_name": "Mont-d'Est - Maille Horizon",
+        "form_label": "Mont d'Est - Palacio - Arcades",
+        "hint": "Sélection conseillée dans ce formulaire : « Mont d'Est - Palacio - Arcades ».",
+    },
+    {
+        "official_name": "La Varenne",
+        "form_label": "La Varenne",
+        "hint": "Sélection conseillée dans ce formulaire : « La Varenne ».",
+    },
+    {
+        "official_name": "Rive-Charmante",
+        "form_label": "Bords de Marne",
+        "hint": "Sélection conseillée dans ce formulaire : « Bords de Marne ».",
+    },
+    {
+        "official_name": "Les Coteaux",
+        "form_label": "Je ne sais pas",
+        "hint": "Ce quartier officiel n'a pas de correspondance évidente dans le formulaire. Choisissez « Je ne sais pas » pour éviter une erreur.",
+    },
+    {
+        "official_name": "Champy - Les Hauts-Bâtons",
+        "form_label": "Champy - Hauts-Bâtons",
+        "hint": "Sélection conseillée dans ce formulaire : « Champy - Hauts-Bâtons ».",
+    },
+    {
+        "official_name": "Butte Verte",
+        "form_label": "Je ne sais pas",
+        "hint": "Ce quartier officiel n'apparaît pas tel quel dans le formulaire. En cas de doute, choisissez « Je ne sais pas ».",
+    },
+    {
+        "official_name": "Les Yvris",
+        "form_label": "Je ne sais pas",
+        "hint": "Ce quartier officiel n'a pas de correspondance évidente dans le formulaire. Choisissez « Je ne sais pas » pour éviter une erreur.",
+    },
+    {
+        "official_name": "Le Bois Saint-Martin",
+        "form_label": "Je ne sais pas",
+        "hint": "Ce quartier officiel n'a pas de correspondance évidente dans le formulaire. Choisissez « Je ne sais pas » pour éviter une erreur.",
+    },
+]
+
+DISTRICT_GUIDE_BY_OFFICIAL_NAME = {
+    item["official_name"]: item for item in DISTRICT_GUIDE
+}
+
+DISTRICT_GUIDE_NOTE = (
+    "La carte reprend le découpage officiel publié par la Ville de Noisy-le-Grand. "
+    "Le formulaire conserve aussi quelques libellés internes, comme « Villeflix » "
+    "ou « Mont d'Est - Palacio - Arcades ». Quand la correspondance n'est pas certaine, "
+    "sélectionnez « Je ne sais pas »."
+)
 
 FORM_MONTHS = [
     "Janvier",
@@ -309,6 +391,13 @@ def close_db(_: Any) -> None:
         db.close()
 
 
+@app.before_request
+def run_submission_retention() -> None:
+    if request.endpoint == "static":
+        return
+    purge_expired_submissions()
+
+
 def init_db() -> None:
     connection = sqlite3.connect(DB_PATH)
     try:
@@ -346,6 +435,120 @@ def init_db() -> None:
         connection.commit()
     finally:
         connection.close()
+
+
+def _iter_geojson_rings(geometry: dict[str, Any]) -> list[list[list[float]]]:
+    geometry_type = geometry.get("type")
+    coordinates = geometry.get("coordinates", [])
+
+    if geometry_type == "Polygon":
+        return [ring for ring in coordinates if ring]
+    if geometry_type == "MultiPolygon":
+        rings: list[list[list[float]]] = []
+        for polygon in coordinates:
+            rings.extend(ring for ring in polygon if ring)
+        return rings
+    return []
+
+
+def load_district_map() -> dict[str, Any]:
+    default_map = {
+        "features": [],
+        "source_url": DISTRICT_MAP_SOURCE_URL,
+        "view_box": "0 0 900 620",
+    }
+
+    if not DISTRICT_MAP_DATA_PATH.exists():
+        return default_map
+
+    raw_data = json.loads(DISTRICT_MAP_DATA_PATH.read_text(encoding="utf-8"))
+    width = 900
+    height = 620
+    padding = 24
+
+    all_points: list[tuple[float, float]] = []
+    for feature in raw_data.get("features", []):
+        for ring in _iter_geojson_rings(feature.get("geometry", {})):
+            all_points.extend((float(point[0]), float(point[1])) for point in ring)
+
+    if not all_points:
+        return default_map
+
+    min_lon = min(point[0] for point in all_points)
+    max_lon = max(point[0] for point in all_points)
+    min_lat = min(point[1] for point in all_points)
+    max_lat = max(point[1] for point in all_points)
+    lon_span = max(max_lon - min_lon, 0.00001)
+    lat_span = max(max_lat - min_lat, 0.00001)
+
+    def project(lon: float, lat: float) -> tuple[float, float]:
+        x = padding + ((lon - min_lon) / lon_span) * (width - padding * 2)
+        y = height - padding - ((lat - min_lat) / lat_span) * (height - padding * 2)
+        return round(x, 1), round(y, 1)
+
+    features: list[dict[str, Any]] = []
+    for feature in raw_data.get("features", []):
+        properties = feature.get("properties", {})
+        name = str(properties.get("nom_quarti", "")).strip()
+        guide = DISTRICT_GUIDE_BY_OFFICIAL_NAME.get(
+            name,
+            {
+                "official_name": name,
+                "form_label": "Je ne sais pas",
+                "hint": "Aucune correspondance sûre n'a été trouvée. Choisissez « Je ne sais pas ».",
+            },
+        )
+        rings = _iter_geojson_rings(feature.get("geometry", {}))
+        path_parts: list[str] = []
+
+        for ring in rings:
+            projected = [project(float(point[0]), float(point[1])) for point in ring]
+            if not projected:
+                continue
+            start_x, start_y = projected[0]
+            commands = [f"M {start_x} {start_y}"]
+            for x, y in projected[1:]:
+                commands.append(f"L {x} {y}")
+            commands.append("Z")
+            path_parts.append(" ".join(commands))
+
+        label_lat, label_lon = properties.get("geo_point_2d", [0, 0])
+        label_x, label_y = project(float(label_lon), float(label_lat))
+        features.append(
+            {
+                "name": name,
+                "number": int(properties.get("num_quar", 0)),
+                "path": " ".join(path_parts),
+                "label_x": label_x,
+                "label_y": label_y,
+                "form_label": guide["form_label"],
+                "hint": guide["hint"],
+            }
+        )
+
+    features.sort(key=lambda item: item["number"])
+    return {
+        "features": features,
+        "source_url": DISTRICT_MAP_SOURCE_URL,
+        "view_box": f"0 0 {width} {height}",
+    }
+
+
+DISTRICT_MAP = load_district_map()
+
+
+def purge_expired_submissions(force: bool = False) -> int:
+    now = datetime.now(timezone.utc)
+    last_run = app.config.get("_last_submission_purge_at")
+    if not force and isinstance(last_run, datetime) and (now - last_run) < timedelta(minutes=30):
+        return 0
+
+    cutoff = (now - timedelta(days=SUBMISSION_RETENTION_DAYS)).isoformat(timespec="seconds")
+    db = get_db()
+    cursor = db.execute("DELETE FROM submissions WHERE submitted_at < ?", (cutoff,))
+    db.commit()
+    app.config["_last_submission_purge_at"] = now
+    return int(cursor.rowcount or 0)
 
 
 def admin_required(view):
@@ -643,7 +846,11 @@ def render_form_page() -> str:
         months=FORM_MONTHS,
         years=years,
         needs_groups=FORM_NEEDS_GROUPS,
+        district_map=DISTRICT_MAP,
+        district_guide=DISTRICT_GUIDE,
+        district_guide_note=DISTRICT_GUIDE_NOTE,
         mediator_url=app.config["MEDIATOR_URL"],
+        pimms_logo_url=url_for("static", filename="images/pimms-mediation-logo.svg"),
         admin_available=True,
     )
 
@@ -664,6 +871,7 @@ def render_dashboard_page(search_text: str) -> str:
 def inject_globals() -> dict[str, Any]:
     return {
         "reporting_name": app.config["REPORTING_NAME"],
+        "retention_days": SUBMISSION_RETENTION_DAYS,
         "inline_styles": get_inline_asset("styles.css"),
         "inline_script": get_inline_asset("script.js"),
     }
@@ -809,6 +1017,8 @@ def admin_export_csv() -> Response:
 
 def main() -> None:
     init_db()
+    with app.app_context():
+        purge_expired_submissions(force=True)
     host = os.getenv("HOST", "127.0.0.1")
     port = int(os.getenv("PORT", "8000"))
     debug = os.getenv("FLASK_DEBUG", "0") == "1"
