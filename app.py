@@ -76,6 +76,26 @@ FORM_DISTRICTS = [
     "Je ne sais pas",
 ]
 
+DISTRICT_SELECTION_GUIDE = [
+    {"official_name": "Le Centre", "form_label": "Centre-ville"},
+    {"official_name": "Le Marnois", "form_label": "Marnois"},
+    {"official_name": "La Grenouillère", "form_label": "Je ne sais pas"},
+    {"official_name": "Les Richardets - Montfort", "form_label": "Richardets"},
+    {"official_name": "Le Pavé Neuf", "form_label": "Pavé Neuf"},
+    {"official_name": "Mont-d'Est - Maille Horizon", "form_label": "Mont d'Est - Palacio - Arcades"},
+    {"official_name": "La Varenne", "form_label": "La Varenne"},
+    {"official_name": "Rive-Charmante", "form_label": "Bords de Marne"},
+    {"official_name": "Les Coteaux", "form_label": "Je ne sais pas"},
+    {"official_name": "Champy - Les Hauts-Bâtons", "form_label": "Champy - Hauts-Bâtons"},
+    {"official_name": "Butte Verte", "form_label": "Je ne sais pas"},
+    {"official_name": "Les Yvris", "form_label": "Je ne sais pas"},
+    {"official_name": "Le Bois Saint-Martin", "form_label": "Je ne sais pas"},
+]
+
+DISTRICT_SELECTION_BY_OFFICIAL_NAME = {
+    item["official_name"]: item["form_label"] for item in DISTRICT_SELECTION_GUIDE
+}
+
 FORM_MONTHS = [
     "Janvier",
     "Février",
@@ -588,6 +608,7 @@ def load_district_map() -> dict[str, Any]:
     for feature in raw_data.get("features", []):
         properties = feature.get("properties", {})
         name = str(properties.get("nom_quarti", "")).strip()
+        form_label = DISTRICT_SELECTION_BY_OFFICIAL_NAME.get(name, "Je ne sais pas")
         rings = _iter_geojson_rings(feature.get("geometry", {}))
         path_parts: list[str] = []
 
@@ -611,6 +632,7 @@ def load_district_map() -> dict[str, Any]:
                 "path": " ".join(path_parts),
                 "label_x": label_x,
                 "label_y": label_y,
+                "form_label": form_label,
             }
         )
 
@@ -935,6 +957,7 @@ def render_form_page() -> str:
         years=years,
         needs_groups=FORM_NEEDS_GROUPS,
         district_map=DISTRICT_MAP,
+        district_guide=DISTRICT_SELECTION_GUIDE,
         mediator_url=app.config["MEDIATOR_URL"],
         pimms_logo_url=url_for("static", filename="images/pimms-mediation-logo.svg"),
         admin_available=True,

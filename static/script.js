@@ -98,6 +98,29 @@ function updateOtherVisibility() {
   }
 }
 
+function syncDistrictGuideState() {
+  const selectedValue = form.elements.district?.value || "";
+  districtMapDialog?.querySelectorAll("[data-district-select]").forEach((node) => {
+    node.dataset.active =
+      selectedValue && node.dataset.districtSelect === selectedValue ? "true" : "false";
+  });
+}
+
+function selectDistrictValue(districtValue) {
+  const input = Array.from(form.querySelectorAll('input[name="district"]')).find(
+    (field) => field.value === districtValue
+  );
+  if (!input) {
+    return;
+  }
+
+  input.checked = true;
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  syncDistrictGuideState();
+  closeDistrictMapDialog();
+  updateProgress();
+}
+
 function openDistrictMapDialog() {
   if (!districtMapDialog || typeof districtMapDialog.showModal !== "function") {
     return;
@@ -108,6 +131,7 @@ function openDistrictMapDialog() {
   }
 
   districtMapToggle?.setAttribute("aria-expanded", "true");
+  syncDistrictGuideState();
 }
 
 function closeDistrictMapDialog() {
@@ -439,6 +463,10 @@ function bindEvents() {
       updateMediatorCallout();
     }
 
+    if (event.target.name === "district") {
+      syncDistrictGuideState();
+    }
+
     updateProgress();
   });
 
@@ -512,6 +540,29 @@ function bindEvents() {
     }
   });
 
+  districtMapDialog?.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-district-select]");
+    if (!trigger) {
+      return;
+    }
+
+    selectDistrictValue(trigger.dataset.districtSelect);
+  });
+
+  districtMapDialog?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    const trigger = event.target.closest("[data-district-select]");
+    if (!trigger) {
+      return;
+    }
+
+    event.preventDefault();
+    selectDistrictValue(trigger.dataset.districtSelect);
+  });
+
   districtMapDialog?.addEventListener("close", () => {
     districtMapToggle?.setAttribute("aria-expanded", "false");
   });
@@ -537,4 +588,5 @@ updateOtherVisibility();
 updateMediatorCallout();
 updateNeedCounters();
 applyNeedsFilter();
+syncDistrictGuideState();
 updateProgress();

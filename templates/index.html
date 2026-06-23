@@ -598,7 +598,8 @@
         </div>
         <p class="dialog__intro">
           Cette aide s'appuie sur le découpage officiel publié par la Ville.
-          Utilisez-la pour repérer le quartier officiel de votre adresse.
+          Cliquez sur un quartier pour le repérer visuellement et retrouver le
+          choix correspondant dans le formulaire.
         </p>
         <div class="district-guide-layout">
           <section class="district-map-card">
@@ -616,6 +617,10 @@
                 class="district-map__shape"
                 d="{{ feature.path }}"
                 aria-label="{{ feature.name }}"
+                data-district-name="{{ feature.name }}"
+                data-district-select="{{ feature.form_label }}"
+                tabindex="0"
+                role="button"
               ></path>
               <text
                 class="district-map__label"
@@ -632,6 +637,22 @@
                 Ville de Noisy-le-Grand - Open Data
               </a>
             </p>
+          </section>
+
+          <section class="district-guide-card">
+            <h3>Quartiers officiels</h3>
+            <div class="district-guide-list">
+              {% for item in district_guide %}
+              <button
+                type="button"
+                class="district-guide-item"
+                data-district-name="{{ item.official_name }}"
+                data-district-select="{{ item.form_label }}"
+              >
+                <strong>{{ item.official_name }}</strong>
+              </button>
+              {% endfor %}
+            </div>
           </section>
         </div>
       </div>
