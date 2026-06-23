@@ -215,8 +215,7 @@
                 {% endfor %}
               </div>
               <p class="helper" id="district-map-note">
-                En cas de doute, ouvrez la carte puis choisissez l'option la plus
-                proche ou « Je ne sais pas ».
+                En cas de doute, ouvrez la carte pour repérer votre quartier.
               </p>
             </div>
           </section>
@@ -528,33 +527,9 @@
               <li>Les champs marqués d'un astérisque sont obligatoires.</li>
               <li>Les choix multiples sont proposés sous forme de cases à cocher.</li>
               <li>Les champs supplémentaires n'apparaissent qu'en cas de besoin.</li>
+              <li>Les réponses sont supprimées automatiquement après {{ retention_days }} jours.</li>
             </ul>
           </section>
-
-          <section class="side-card">
-            <h2>Confidentialité</h2>
-            <p>
-              Les informations utiles à l'accueil peuvent être transmises à
-              l'équipe d'accompagnement selon votre circuit de prise en charge.
-            </p>
-            <p class="helper">
-              Les réponses sont conservées {{ retention_days }} jours puis
-              supprimées automatiquement.
-            </p>
-          </section>
-
-          {% if admin_available %}
-          <section class="side-card">
-            <h2>Suivi interne</h2>
-            <p>
-              Les réponses enregistrées alimentent un tableau de suivi sécurisé
-              accessible depuis l'espace d'administration.
-            </p>
-            <a class="button button--secondary" href="{{ url_for('index', mode='tableau') }}">
-              Ouvrir l'administration
-            </a>
-          </section>
-          {% endif %}
         </aside>
       </main>
     </div>
@@ -623,8 +598,7 @@
         </div>
         <p class="dialog__intro">
           Cette aide s'appuie sur le découpage officiel publié par la Ville.
-          Cliquez sur la carte ou sur la liste pour retrouver la sélection la
-          plus proche dans le formulaire.
+          Utilisez-la pour repérer le quartier officiel de votre adresse.
         </p>
         <div class="district-guide-layout">
           <section class="district-map-card">
@@ -642,11 +616,6 @@
                 class="district-map__shape"
                 d="{{ feature.path }}"
                 aria-label="{{ feature.name }}"
-                data-district-name="{{ feature.name }}"
-                data-district-select="{{ feature.form_label }}"
-                data-district-hint="{{ feature.hint }}"
-                tabindex="0"
-                role="button"
               ></path>
               <text
                 class="district-map__label"
@@ -657,37 +626,12 @@
               </text>
               {% endfor %}
             </svg>
-            <div class="district-guide-preview" id="district-guide-preview" aria-live="polite">
-              <strong id="district-guide-preview-name">Sélectionnez un quartier sur la carte</strong>
-              <p id="district-guide-preview-text">
-                Une recommandation de sélection apparaîtra ici.
-              </p>
-            </div>
             <p class="district-map-card__source">
               Source :
               <a href="{{ district_map.source_url }}" target="_blank" rel="noreferrer noopener">
                 Ville de Noisy-le-Grand - Open Data
               </a>
             </p>
-          </section>
-
-          <section class="district-guide-card">
-            <h3>Quartiers officiels et sélection conseillée</h3>
-            <div class="district-guide-list">
-              {% for item in district_guide %}
-              <button
-                type="button"
-                class="district-guide-item"
-                data-district-name="{{ item.official_name }}"
-                data-district-select="{{ item.form_label }}"
-                data-district-hint="{{ item.hint }}"
-              >
-                <strong>{{ item.official_name }}</strong>
-                <span>{{ item.hint }}</span>
-              </button>
-              {% endfor %}
-            </div>
-            <p class="helper">{{ district_guide_note }}</p>
           </section>
         </div>
       </div>

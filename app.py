@@ -76,85 +76,6 @@ FORM_DISTRICTS = [
     "Je ne sais pas",
 ]
 
-DISTRICT_GUIDE = [
-    {
-        "official_name": "Le Centre",
-        "form_label": "Centre-ville",
-        "hint": "Sélection conseillée dans ce formulaire : « Centre-ville ».",
-    },
-    {
-        "official_name": "Le Marnois",
-        "form_label": "Marnois",
-        "hint": "Sélection conseillée dans ce formulaire : « Marnois ».",
-    },
-    {
-        "official_name": "La Grenouillère",
-        "form_label": "Je ne sais pas",
-        "hint": "Ce quartier officiel n'apparaît pas tel quel dans le formulaire. En cas de doute, choisissez « Je ne sais pas ».",
-    },
-    {
-        "official_name": "Les Richardets - Montfort",
-        "form_label": "Richardets",
-        "hint": "Sélection conseillée dans ce formulaire : « Richardets ».",
-    },
-    {
-        "official_name": "Le Pavé Neuf",
-        "form_label": "Pavé Neuf",
-        "hint": "Sélection conseillée dans ce formulaire : « Pavé Neuf ».",
-    },
-    {
-        "official_name": "Mont-d'Est - Maille Horizon",
-        "form_label": "Mont d'Est - Palacio - Arcades",
-        "hint": "Sélection conseillée dans ce formulaire : « Mont d'Est - Palacio - Arcades ».",
-    },
-    {
-        "official_name": "La Varenne",
-        "form_label": "La Varenne",
-        "hint": "Sélection conseillée dans ce formulaire : « La Varenne ».",
-    },
-    {
-        "official_name": "Rive-Charmante",
-        "form_label": "Bords de Marne",
-        "hint": "Sélection conseillée dans ce formulaire : « Bords de Marne ».",
-    },
-    {
-        "official_name": "Les Coteaux",
-        "form_label": "Je ne sais pas",
-        "hint": "Ce quartier officiel n'a pas de correspondance évidente dans le formulaire. Choisissez « Je ne sais pas » pour éviter une erreur.",
-    },
-    {
-        "official_name": "Champy - Les Hauts-Bâtons",
-        "form_label": "Champy - Hauts-Bâtons",
-        "hint": "Sélection conseillée dans ce formulaire : « Champy - Hauts-Bâtons ».",
-    },
-    {
-        "official_name": "Butte Verte",
-        "form_label": "Je ne sais pas",
-        "hint": "Ce quartier officiel n'apparaît pas tel quel dans le formulaire. En cas de doute, choisissez « Je ne sais pas ».",
-    },
-    {
-        "official_name": "Les Yvris",
-        "form_label": "Je ne sais pas",
-        "hint": "Ce quartier officiel n'a pas de correspondance évidente dans le formulaire. Choisissez « Je ne sais pas » pour éviter une erreur.",
-    },
-    {
-        "official_name": "Le Bois Saint-Martin",
-        "form_label": "Je ne sais pas",
-        "hint": "Ce quartier officiel n'a pas de correspondance évidente dans le formulaire. Choisissez « Je ne sais pas » pour éviter une erreur.",
-    },
-]
-
-DISTRICT_GUIDE_BY_OFFICIAL_NAME = {
-    item["official_name"]: item for item in DISTRICT_GUIDE
-}
-
-DISTRICT_GUIDE_NOTE = (
-    "La carte reprend le découpage officiel publié par la Ville de Noisy-le-Grand. "
-    "Le formulaire conserve aussi quelques libellés internes, comme « Villeflix » "
-    "ou « Mont d'Est - Palacio - Arcades ». Quand la correspondance n'est pas certaine, "
-    "sélectionnez « Je ne sais pas »."
-)
-
 FORM_MONTHS = [
     "Janvier",
     "Février",
@@ -667,14 +588,6 @@ def load_district_map() -> dict[str, Any]:
     for feature in raw_data.get("features", []):
         properties = feature.get("properties", {})
         name = str(properties.get("nom_quarti", "")).strip()
-        guide = DISTRICT_GUIDE_BY_OFFICIAL_NAME.get(
-            name,
-            {
-                "official_name": name,
-                "form_label": "Je ne sais pas",
-                "hint": "Aucune correspondance sûre n'a été trouvée. Choisissez « Je ne sais pas ».",
-            },
-        )
         rings = _iter_geojson_rings(feature.get("geometry", {}))
         path_parts: list[str] = []
 
@@ -698,8 +611,6 @@ def load_district_map() -> dict[str, Any]:
                 "path": " ".join(path_parts),
                 "label_x": label_x,
                 "label_y": label_y,
-                "form_label": guide["form_label"],
-                "hint": guide["hint"],
             }
         )
 
@@ -1024,8 +935,6 @@ def render_form_page() -> str:
         years=years,
         needs_groups=FORM_NEEDS_GROUPS,
         district_map=DISTRICT_MAP,
-        district_guide=DISTRICT_GUIDE,
-        district_guide_note=DISTRICT_GUIDE_NOTE,
         mediator_url=app.config["MEDIATOR_URL"],
         pimms_logo_url=url_for("static", filename="images/pimms-mediation-logo.svg"),
         admin_available=True,

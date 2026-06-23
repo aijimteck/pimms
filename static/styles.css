@@ -756,13 +756,10 @@ textarea:focus {
 
 .district-guide-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.9fr);
-  gap: 18px;
   margin-top: 18px;
 }
 
-.district-map-card,
-.district-guide-card {
+.district-map-card {
   border: 1px solid var(--line);
   border-radius: 18px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
@@ -781,11 +778,9 @@ textarea:focus {
   fill: #d8e6f7;
   stroke: #6e8fb6;
   stroke-width: 2;
-  cursor: pointer;
   transition:
     fill 160ms ease,
-    stroke 160ms ease,
-    transform 160ms ease;
+    stroke 160ms ease;
 }
 
 .district-map__shape:hover,
@@ -793,11 +788,6 @@ textarea:focus {
   fill: #bfd6f3;
   stroke: #345f92;
   outline: none;
-}
-
-.district-map__shape[data-active="true"] {
-  fill: #89b6ea;
-  stroke: #0e4f93;
 }
 
 .district-map__label {
@@ -817,73 +807,8 @@ textarea:focus {
   font-size: 0.92rem;
 }
 
-.district-guide-preview {
-  display: grid;
-  gap: 6px;
-  margin-top: 16px;
-  padding: 14px 16px;
-  border-radius: 14px;
-  background: #eef5fd;
-  border: 1px solid #d0dded;
-}
-
-.district-guide-preview strong {
-  color: var(--accent-strong);
-  font-size: 0.98rem;
-}
-
-.district-guide-preview p {
-  margin: 0;
-  color: var(--text-soft);
-  font-size: 0.92rem;
-}
-
 .district-map-card__source a {
   color: var(--accent);
-}
-
-.district-guide-card h3 {
-  margin: 0 0 14px;
-  font-size: 1.06rem;
-}
-
-.district-guide-list {
-  display: grid;
-  gap: 10px;
-}
-
-.district-guide-item {
-  display: grid;
-  gap: 4px;
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: #fff;
-  text-align: left;
-}
-
-.district-guide-item:hover,
-.district-guide-item:focus-visible {
-  border-color: #7ea2c8;
-  background: #f4f8fd;
-  outline: none;
-}
-
-.district-guide-item[data-active="true"] {
-  border-color: #0e4f93;
-  background: #eaf3fe;
-  box-shadow: inset 0 0 0 1px rgba(14, 79, 147, 0.12);
-}
-
-.district-guide-item strong {
-  color: var(--text-main);
-  font-size: 0.98rem;
-}
-
-.district-guide-item span {
-  color: var(--text-soft);
-  font-size: 0.92rem;
 }
 
 .embed-frame-shell {
