@@ -474,6 +474,37 @@ textarea:focus {
   gap: 12px;
 }
 
+.accordion__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--icon-surface, #edf4fb);
+  color: var(--icon-accent, var(--accent));
+  box-shadow: inset 0 0 0 1px rgba(5, 56, 112, 0.08);
+}
+
+.accordion__icon-svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.accordion summary:hover .accordion__icon,
+.accordion summary:focus-visible .accordion__icon {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 0 0 1px rgba(5, 56, 112, 0.12),
+    0 10px 20px rgba(9, 34, 66, 0.08);
+}
+
 .accordion__count {
   min-width: 34px;
   padding: 4px 10px;

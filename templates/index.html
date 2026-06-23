@@ -267,6 +267,23 @@
               <details class="accordion">
                 <summary>
                   <span class="accordion__meta">
+                    {% if group["icon"] %}
+                    <span
+                      class="accordion__icon"
+                      style="--icon-surface: {{ group['icon']['surface'] }}; --icon-accent: {{ group['icon']['accent'] }};"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        class="accordion__icon-svg"
+                        viewBox="{{ group['icon']['view_box'] }}"
+                        focusable="false"
+                      >
+                        {% for path in group["icon"]["paths"] %}
+                        <path d="{{ path }}"></path>
+                        {% endfor %}
+                      </svg>
+                    </span>
+                    {% endif %}
                     <span>{{ group["title"] }}</span>
                   </span>
                   <span class="accordion__count" data-group-count="{{ group["name"] }}">0</span>

@@ -328,6 +328,183 @@ FORM_NEEDS_GROUPS = [
     },
 ]
 
+FORM_NEEDS_ICON_MAP = {
+    "emploiFormation": {
+        "label": "Emploi et formation",
+        "view_box": "0 0 24 24",
+        "surface": "#e7f1ff",
+        "accent": "#0b5faf",
+        "paths": [
+            "M9 7V5.75A1.75 1.75 0 0 1 10.75 4h2.5A1.75 1.75 0 0 1 15 5.75V7",
+            "M4.75 8h14.5A1.75 1.75 0 0 1 21 9.75v7.5A1.75 1.75 0 0 1 19.25 19H4.75A1.75 1.75 0 0 1 3 17.25v-7.5A1.75 1.75 0 0 1 4.75 8Z",
+            "M3 12h18",
+        ],
+    },
+    "cafAidesSociales": {
+        "label": "Aides sociales",
+        "view_box": "0 0 24 24",
+        "surface": "#ffefe8",
+        "accent": "#d96a4f",
+        "paths": [
+            "M12 20.5s-6.5-4.1-6.5-8.8A3.7 3.7 0 0 1 12 8.6a3.7 3.7 0 0 1 6.5 3.1c0 4.7-6.5 8.8-6.5 8.8Z",
+        ],
+    },
+    "sante": {
+        "label": "Santé",
+        "view_box": "0 0 24 24",
+        "surface": "#e8f7f3",
+        "accent": "#118a73",
+        "paths": [
+            "M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z",
+            "M12 8v8",
+            "M8 12h8",
+        ],
+    },
+    "impots": {
+        "label": "Impôts",
+        "view_box": "0 0 24 24",
+        "surface": "#eef1f7",
+        "accent": "#475467",
+        "paths": [
+            "M7 3.5h10l2 2v15l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5-2 1.5V3.5Z",
+            "M9 8h6",
+            "M9 12h6",
+            "M9 16h4",
+        ],
+    },
+    "retraite": {
+        "label": "Retraite",
+        "view_box": "0 0 24 24",
+        "surface": "#fff3df",
+        "accent": "#c7792b",
+        "paths": [
+            "M4 16h16",
+            "M7 16a5 5 0 0 1 10 0",
+            "M12 4v4",
+            "M5.5 8.5l2 2",
+            "M18.5 8.5l-2 2",
+            "M4.5 12H7",
+            "M17 12h2.5",
+        ],
+    },
+    "logement": {
+        "label": "Logement",
+        "view_box": "0 0 24 24",
+        "surface": "#e9f7ef",
+        "accent": "#2f855a",
+        "paths": [
+            "M4 11.5 12 5l8 6.5",
+            "M6.5 10.5V19h11V10.5",
+            "M10 19v-5h4v5",
+        ],
+    },
+    "documentsIdentite": {
+        "label": "Documents et identité",
+        "view_box": "0 0 24 24",
+        "surface": "#eef2ff",
+        "accent": "#4f46e5",
+        "paths": [
+            "M4.5 6.5h15A1.5 1.5 0 0 1 21 8v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 16V8a1.5 1.5 0 0 1 1.5-1.5Z",
+            "M8 11.5a1.75 1.75 0 1 1 0-3.5 1.75 1.75 0 0 1 0 3.5Z",
+            "M12 10h5",
+            "M12 13.5h5",
+            "M6 15.5c.8-1.3 3.2-1.3 4 0",
+        ],
+    },
+    "numerique": {
+        "label": "Numérique",
+        "view_box": "0 0 24 24",
+        "surface": "#e8f8fb",
+        "accent": "#0f7c90",
+        "paths": [
+            "M4.5 5h15A1.5 1.5 0 0 1 21 6.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.5v-9A1.5 1.5 0 0 1 4.5 5Z",
+            "M3 15h18",
+            "M9 19h6",
+            "M11 17v2",
+        ],
+    },
+    "handicap": {
+        "label": "Handicap",
+        "view_box": "0 0 24 24",
+        "surface": "#f3ecff",
+        "accent": "#7c3aed",
+        "paths": [
+            "M12 5a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z",
+            "M12 9.5v5.5",
+            "M8.5 11.5 12 9.5l3.5 2",
+            "M10 20l2-5 2 5",
+            "M9 15.5H7",
+        ],
+    },
+    "transport": {
+        "label": "Transport",
+        "view_box": "0 0 24 24",
+        "surface": "#e8f4ff",
+        "accent": "#2463a6",
+        "paths": [
+            "M7 4.5h10A2.5 2.5 0 0 1 19.5 7v7A4.5 4.5 0 0 1 15 18.5H9A4.5 4.5 0 0 1 4.5 14V7A2.5 2.5 0 0 1 7 4.5Z",
+            "M8.5 10h3",
+            "M12.5 10h3",
+            "M8.5 13.5h7",
+            "M9 18.5l-2 2.5",
+            "M15 18.5l2 2.5",
+        ],
+    },
+    "education": {
+        "label": "Éducation",
+        "view_box": "0 0 24 24",
+        "surface": "#fff0ea",
+        "accent": "#c75b39",
+        "paths": [
+            "M3 10.5 12 6l9 4.5-9 4.5-9-4.5Z",
+            "M7.5 12.5v4c3 2 6 2 9 0v-4",
+            "M21 10.5v4.5",
+        ],
+    },
+    "banqueAssurance": {
+        "label": "Banque et assurance",
+        "view_box": "0 0 24 24",
+        "surface": "#eef2f6",
+        "accent": "#364152",
+        "paths": [
+            "M12 4.5l9 4H3l9-4Z",
+            "M3.5 9.5h17",
+            "M5.5 9.5V18",
+            "M9.5 9.5V18",
+            "M14.5 9.5V18",
+            "M18.5 9.5V18",
+            "M2.5 18h19",
+        ],
+    },
+    "energieHabitat": {
+        "label": "Énergie et habitat",
+        "view_box": "0 0 24 24",
+        "surface": "#edf8e8",
+        "accent": "#4f8a10",
+        "paths": [
+            "M4 11.5 12 5l8 6.5",
+            "M6.5 10.5V19h11V10.5",
+            "M13.5 9.5 10.5 14H13.5L12.5 18 15.5 14H12.5L13.5 9.5Z",
+        ],
+    },
+    "autre": {
+        "label": "Autre demande",
+        "view_box": "0 0 24 24",
+        "surface": "#f3f4f6",
+        "accent": "#6b7280",
+        "paths": [
+            "M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z",
+            "M12 8v8",
+            "M8 12h8",
+        ],
+    },
+}
+
+for group in FORM_NEEDS_GROUPS:
+    icon = FORM_NEEDS_ICON_MAP.get(group["name"])
+    if icon:
+        group["icon"] = icon
+
 
 def load_env_file(path: Path) -> None:
     if not path.exists():
