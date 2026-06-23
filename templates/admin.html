@@ -15,9 +15,6 @@
             <div>
               <p class="hero__eyebrow">Administration</p>
               <h1>{{ reporting_name }}</h1>
-              <p class="hero__intro">
-                Tableau des réponses centralisé avec identifiants auto-incrémentés.
-              </p>
             </div>
             <form method="post" action="{{ url_for('index', mode='tableau') }}">
               <input type="hidden" name="admin_action" value="logout" />
@@ -64,10 +61,6 @@
         </div>
 
         <div class="helper-stack">
-          <p class="helper">
-            Mot de passe administrateur enregistré dans :
-            <code>{{ admin_password_path }}</code>
-          </p>
           <p class="helper">
             Chaque réponse reçoit un identifiant unique, croissant, à partir de 1.
           </p>
